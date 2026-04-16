@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Throwing Target Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameContainer {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #titleScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        #titleScreen h1 {
+            color: #e94560;
+            font-size: 72px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #titleScreen p {
+            color: #00d4ff;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            flex-direction: column;
+        }
+
+        .title-button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .title-button:hover {
+            background: #ff6b7a;
+        }
+
+        #creditsScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        #backButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: #00d4ff;
+            font-size: 32px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        #backButton:hover {
+            color: #e94560;
+        }
+
+        #creditsText {
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        canvas {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border: 3px solid #e94560;
+            cursor: crosshair;
+            display: block;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+        }
+
+        #score {
+            color: #e94560;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #level {
+            color: #00d4ff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #balls {
+            color: #FFD700;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #instructions {
+            color: #00d4ff;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 100;
+            color: #e94560;
+        }
+
+        #gameOver h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        #gameOver p {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        #gameOver button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 18px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #gameOver button:hover {
+            background: #ff6b7a;
+        }
+    </style>
+</head>
+<body>
+    <div id="titleScreen">
+        <h1>FOOTBALL THROW</h1>
+        <p>Hit all the targets!</p>
+        <div class="button-group">
+            <button class="title-button" onclick="startGame()">Start Game</button>
+            <button class="title-button" onclick="showCredits()">Credits</button>
+        </div>
+    </div>
+
+    <div id="creditsScreen">
+        <button id="backButton" onclick="hideCredits()">← Back</button>
+        <div id="creditsText">
+            <p>everything- Jebby siebibi</p>
+            <p>music- I dont believe in music. sit in silence</p>
+        </div>
+    </div>
+
+    <div id="gameContainer" style="display: none;">
+        <div id="instructions">
+            <p>Left Click + Drag to throw the football. Catch all the targets!</p>
+            <p style="font-size: 12px; color: #FF6B35; margin-top: 5px;">Cross the left boundary (orange line) to force release!</p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1024px;">
+            <div id="score">Score: 0</div>
+            <div id="level">Level: 0</div>
+            <div id="balls">Balls: 10</div>
+        </div>
+        <canvas id="gameCanvas" width="1024" height="576"></canvas>
+        <div id="gameOver">
+            <h1>Game Over!</h1>
+            <p id="finalScore">Score: 0</p>
+            <p id="finalLevel">Level: 0</p>
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button onclick="goToMainMenu()">Main Menu</button>
+                <button onclick="restartLevel()">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+
+    <!--
+    OPTIONAL: Add custom sound effects
+
+    1. Create an 'assets/sounds/' folder in your project
+    2. Add these MP3 files:
+       - swoosh.mp3 (throw sound)
+       - blast.mp3 (hit sound)
+       - chime.mp3 (level up sound)
+
+    3. Add these lines at the start of game.js, right after "const audioManager = new AudioManager();":
+
+       audioManager.loadSound('throw', 'assets/sounds/swoosh.mp3');
+       audioManager.loadSound('blast', 'assets/sounds/blast.mp3');
+       audioManager.loadSound('levelup', 'assets/sounds/chime.mp3');
+
+    4. Then change these lines to use custom sounds:
+       - Replace: audioManager.playSwoosh(); with audioManager.play('throw');
+       - Replace: audioManager.playBlast(); with audioManager.play('blast');
+       - Replace: audioManager.playChime(); with audioManager.play('levelup');
+
+    The game will use procedural sounds if custom files aren't loaded.
+    -->
+</body>
+</html>
